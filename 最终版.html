@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>高考加油！专属祝福 | 致弟弟</title>
+    <!-- 引入 Google Fonts 正楷/标准中文字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 提升移动体验，避免拖动文字，但不影响复制 */
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            font-family: 'Noto Serif SC', 'ZCOOL KuaiLe', cursive, sans-serif;
+            overflow-x: hidden;
+            background: #0a2f2f; /* 底色仅作fallback */
+            position: relative;
+        }
+
+        /* canvas 动态粒子背景层 */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 0;
+            pointer-events: none; /* 让背景不影响点击 */
+        }
+
+        /* 主内容容器 */
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 18px 60px;
+            backdrop-filter: blur(0px);
+        }
+
+        /* 顶部倒计时卡片风格 */
+        .countdown-section {
+            background: rgba(255, 248, 225, 0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 18px 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            border: 1px solid rgba(255, 215, 150, 0.6);
+        }
+
+        .countdown-title {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: #b45f1b;
+            font-weight: 600;
+        }
+
+        .countdown-number {
+            font-size: 2.6rem;
+            font-weight: 800;
+            font-family: monospace;
+            color: #d43f1d;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 60px;
+            margin-top: 10px;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        /* 照片+视频区域 - 嵌入两张照片和一个视频 */
+        .media-frame {
+            background: rgba(255, 250, 240, 0.9);
+            border-radius: 36px;
+            padding: 20px 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.2);
+            backdrop-filter: blur(2px);
+            text-align: center;
+        }
+
+        .media-title {
+            font-size: 1rem;
+            color: #a7582c;
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .media-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 双照片布局 (上下或左右，移动端上下更佳) */
+        .photos-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .photo-card {
+            background: white;
+            border-radius: 28px;
+            padding: 8px;
+            box-shadow: 0 10px 18px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+            flex: 1;
+            min-width: 130px;
+            max-width: 200px;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            display: block;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+
+        .photo-card:hover {
+            transform: scale(1.02);
+        }
+
+        /* 视频容器样式 */
+        .video-container {
+            background: #00000022;
+            border-radius: 32px;
+            padding: 6px;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+        }
+
+        .video-container video {
+            width: 100%;
+            border-radius: 28px;
+            display: block;
+            background: #1e1e1e;
+            max-height: 280px;
+            object-fit: cover;
+        }
+
+        /* 自定义视频控制栏样式简洁 */
+        video::-webkit-media-controls {
+            border-radius: 28px;
+        }
+
+        /* 寄语卡片 - 正楷字体效果 */
+        .message-card {
+            background: rgba(254, 249, 239, 0.96);
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 28px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid #ffe2b5;
+        }
+
+        .handwriting {
+            font-family: 'Noto Serif SC', 'ZCOOL KuaiLe', serif;
+            font-size: 1.6rem;
+            font-weight: 500;
+            line-height: 1.55;
+            color: #2c241a;
+            text-align: center;
+            word-break: break-word;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23f7d9a8" width="18px" height="18px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>') repeat;
+            background-size: 24px;
+            background-blend-mode: overlay;
+            padding: 10px;
+            letter-spacing: 1px;
+        }
+
+        .signature {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 500;
+            color: #b45f2b;
+        }
+
+        /* 蜡烛许愿区域 - 单根蜡烛 */
+        .candle-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 60px;
+            padding: 20px 10px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(2px);
+        }
+
+        .candle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .candle {
+            position: relative;
+            width: 70px;
+            height: 140px;
+            background: linear-gradient(145deg, #f9e0a0, #f5bc70);
+            border-radius: 35px 35px 20px 20px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            margin: 0 auto;
+        }
+
+        .candle:active {
+            transform: scale(0.97);
+        }
+
+        .wick {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 20px;
+            background: #2b1a0c;
+            border-radius: 2px;
+            z-index: 2;
+        }
+
+        .flame {
+            position: absolute;
+            top: -32px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 28px;
+            height: 44px;
+            background: radial-gradient(circle, #ffb347, #ff6600);
+            border-radius: 50% 50% 40% 40%;
+            box-shadow: 0 0 20px 6px rgba(255, 80, 0, 0.7);
+            transition: all 0.08s ease;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        @keyframes flickerJump {
+            0% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0.95;
+                box-shadow: 0 0 18px 5px rgba(255, 80, 0, 0.8);
+            }
+            25% {
+                transform: translateX(-50%) scale(1.12) translateY(-3px);
+                opacity: 1;
+                box-shadow: 0 0 25px 8px #ff9933;
+            }
+            50% {
+                transform: translateX(-50%) scale(0.98) translateY(2px);
+                opacity: 0.9;
+                box-shadow: 0 0 20px 6px rgba(255, 80, 0, 0.7);
+            }
+            75% {
+                transform: translateX(-50%) scale(1.08) translateY(-2px);
+                opacity: 1;
+                box-shadow: 0 0 22px 7px #ffaa44;
+            }
+            100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0.95;
+                box-shadow: 0 0 18px 5px rgba(255, 80, 0, 0.8);
+            }
+        }
+
+        .flame.jumping {
+            animation: flickerJump 0.25s ease-in-out 3;
+        }
+
+        .wish-text {
+            font-size: 1.1rem;
+            background: rgba(0,0,0,0.65);
+            padding: 10px 22px;
+            border-radius: 60px;
+            color: #fff3cf;
+            font-weight: 500;
+            text-align: center;
+            max-width: 90%;
+            margin-top: 10px;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s;
+            letter-spacing: 1px;
+        }
+
+        /* 随机语录盒子 */
+        .quote-box {
+            background: rgba(46, 34, 21, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 18px;
+            text-align: center;
+            margin-bottom: 25px;
+            color: #fff3e0;
+            font-size: 1.2rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,215,150,0.8);
+        }
+
+        .quote-content {
+            font-family: 'Noto Serif SC', 'ZCOOL KuaiLe', monospace;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        .quote-btn {
+            background: #ffaa55;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #2d1b0e;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .quote-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* 音乐播放器小控件 */
+        .music-player {
+            background: rgba(0,0,0,0.4);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 8px 18px;
+            width: fit-content;
+            margin: 0 auto 20px;
+            backdrop-filter: blur(6px);
+        }
+        .music-btn {
+            background: #ffc285;
+            border: none;
+            font-size: 1.2rem;
+            padding: 6px 18px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .music-status {
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: rgba(255,245,215,0.8);
+            margin-top: 30px;
+        }
+
+        button {
+            background: none;
+            border: none;
+        }
+        @media (max-width: 480px) {
+            .handwriting {
+                font-size: 1.4rem;
+            }
+            .photo-card {
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="particleCanvas"></canvas>
+
+<div class="container">
+    <!-- 高考倒计时模块 -->
+    <div class="countdown-section">
+        <div class="countdown-title">⏳ 决战高考 · 倒计时 ⏳</div>
+        <div class="countdown-number" id="countdownDisplay">加载中...</div>
+        <div style="font-size: 0.8rem; margin-top: 6px;">全力以赴，未来可期</div>
+    </div>
+
+    <!-- 嵌入两张照片 + 一个视频区域 (根据需求改为两张照片 + 一个视频) -->
+    <div class="media-frame">
+        <div class="media-title">📸 回忆时光 · 为你加油 🎥</div>
+        <div class="media-grid">
+            <!-- 两张照片横向或自适应排列 -->
+            <div class="photos-row">
+                <div class="photo-card">
+                    <img src="C:\Users\17453\Desktop\高考祝福\2.jpg" alt="鼓励照片1 - 弟弟奋斗瞬间">
+                </div>
+                <div class="photo-card">
+                    <img src="C:\Users\17453\Desktop\高考祝福\1.jpg" alt="鼓励照片2 - 金榜题名祝福">
+                </div>
+            </div>
+            <!-- 视频区域：嵌入一个温暖励志视频（示例为高考加油公开视频片段，使用可访问的mp4示例）-->
+            <div class="video-container">
+                <video id="blessingVideo" controls preload="metadata" poster="C:\Users\17453\Desktop\高考祝福\高考加油.jpg">
+                    <source src="C:\Users\17453\Desktop\高考祝福\3.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放，但祝福依旧！加油弟弟！
+                </video>
+                <div style="font-size:0.7rem; margin-top: 8px; color:#a7582c;">⭐ 点击播放，为你助威 ⭐</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 手写寄语卡片 - 正楷风格 -->
+    <div class="message-card">
+        <div class="handwriting" id="personalMessage">
+            亲爱的弟弟，<br>
+            高考是青春的一场盛大奔赴，<br>
+            愿你落笔生花，不负韶华。<br>
+            我们在背后永远支持你！<br>
+            💪 加油，未来是你的 💪
+        </div>
+        <div class="signature">—— 永远挺你的哥哥</div>
+    </div>
+
+    <!-- 蜡烛许愿区域 - 单根蜡烛（点击火焰跳动+随机祝福语） -->
+    <div class="candle-wrapper">
+        <div class="candle-container">
+            <div class="candle" id="wishCandle">
+                <div class="wick"></div>
+                <div class="flame" id="candleFlame"></div>
+            </div>
+        </div>
+        <div class="wish-text" id="wishMessage">🕯️ 点击蜡烛，许下心愿 · 火焰跳动赐福 🕯️</div>
+    </div>
+
+    <!-- 随机加油语录区域 -->
+    <div class="quote-box">
+        <div class="quote-content" id="randomQuote">🚀 每一次努力都是幸运的伏笔！</div>
+        <button class="quote-btn" id="refreshQuoteBtn">📖 换一句加油语录</button>
+    </div>
+
+    <!-- 背景音乐控件 -->
+    <div class="music-player">
+        <button class="music-btn" id="playMusicBtn">🎵 播放音乐</button>
+        <button class="music-btn" id="pauseMusicBtn">⏸️ 暂停</button>
+        <span class="music-status" id="musicStatus">未播放</span>
+    </div>
+    <footer>❤️ 愿你合上笔盖的那一刻，有着战士收刀入鞘般的骄傲 ❤️</footer>
+</div>
+
+<script>
+    (function() {
+        // ----------------------------- 1. 动态粒子背景 Canvas -----------------------------
+        const canvas = document.getElementById('particleCanvas');
+        let ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        const PARTICLE_COUNT = 90;
+        let animationId = null;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            initParticles();
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 5 + 2,
+                    alpha: Math.random() * 0.6 + 0.2,
+                    speedX: (Math.random() - 0.5) * 0.4,
+                    speedY: (Math.random() - 0.5) * 0.2 - 0.1,
+                });
+            }
+        }
+
+        function drawParticles() {
+            if (!ctx) return;
+            const gradient = ctx.createLinearGradient(0, 0, width * 0.8, height);
+            gradient.addColorStop(0, '#0a2f2f');
+            gradient.addColorStop(0.5, '#2c4b3e');
+            gradient.addColorStop(1, '#1d3e3a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            
+            for (let p of particles) {
+                ctx.beginPath();
+                let hue = 35 + Math.sin(Date.now() * 0.001 * p.x * 0.01) * 15;
+                ctx.fillStyle = `hsla(${hue}, 85%, 70%, ${p.alpha})`;
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                p.x += p.speedX;
+                p.y += p.speedY;
+                
+                if (p.x < -20) p.x = width + 20;
+                if (p.x > width + 20) p.x = -20;
+                if (p.y < -20) p.y = height + 20;
+                if (p.y > height + 20) p.y = -20;
+            }
+            ctx.globalCompositeOperation = 'lighter';
+            for (let p of particles) {
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(255, 210, 90, ${p.alpha * 0.4})`;
+                ctx.arc(p.x - 1, p.y - 1, p.radius * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over';
+            animationId = requestAnimationFrame(drawParticles);
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+        resizeCanvas();
+        drawParticles();
+
+        // ----------------------------- 2. 高考倒计时（2026年6月7日）-------------------------
+        function getExamDate() {
+            let now = new Date();
+            let year = now.getFullYear();
+            let examDay = new Date(year, 5, 7);
+            if (now > examDay) {
+                examDay = new Date(year + 1, 5, 7);
+            }
+            return examDay;
+        }
+
+        function updateCountdown() {
+            const target = getExamDate();
+            const now = new Date();
+            const diff = target - now;
+            if (diff <= 0) {
+                document.getElementById('countdownDisplay').innerHTML = '🎉 高考已至！金榜题名 🎉';
+                return;
+            }
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (86400000)) / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            document.getElementById('countdownDisplay').innerHTML = `${days}天 ${hours}时 ${minutes}分 ${seconds}秒`;
+        }
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // ----------------------------- 3. 单根蜡烛火焰跳动 + 随机祝福语 -----------------------------
+        const candle = document.getElementById('wishCandle');
+        const flame = document.getElementById('candleFlame');
+        const wishMessageSpan = document.getElementById('wishMessage');
+        
+        const blessingLibrary = [
+            "🌟 愿你所向披靡，高考必胜！ 🌟",
+            "🔥 火焰为你燃烧，智慧为你加冕！金榜题名！",
+            "✨ 每一簇火苗，都承载着好运，弟弟加油！",
+            "💪 稳住心态，你是最棒的！高考大捷！",
+            "📚 所有的努力都会在六月发光，超常发挥！",
+            "🏆 旗开得胜，马到成功，一举夺魁！",
+            "🍀 考神附体，会的全对，蒙的全会！",
+            "🎯 愿你合上笔盖那一刻，有着战士收刀般的骄傲！",
+            "💎 付出必有回报，梦想触手可及！",
+            "🌈 前程似锦，未来可期，我们在大学等你！",
+            "🕯️ 许愿星火，照亮你的锦绣前程！",
+            "⭐ 乾坤未定，你我皆是黑马，弟弟冲啊！",
+            "📖 你的笔下拥有一个色彩绚丽的世界，高考加油！"
+        ];
+        
+        function flameJump() {
+            if (!flame) return;
+            flame.classList.remove('jumping');
+            void flame.offsetWidth;
+            flame.classList.add('jumping');
+            setTimeout(() => {
+                if (flame) flame.classList.remove('jumping');
+            }, 750);
+        }
+        
+        function showRandomBlessing() {
+            const randomIndex = Math.floor(Math.random() * blessingLibrary.length);
+            const blessing = blessingLibrary[randomIndex];
+            wishMessageSpan.innerHTML = `🕯️ ${blessing} 🕯️`;
+            wishMessageSpan.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                if (wishMessageSpan) wishMessageSpan.style.transform = '';
+            }, 300);
+        }
+        
+        function onCandleClick() {
+            flameJump();
+            showRandomBlessing();
+            candle.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                if (candle) candle.style.transform = '';
+            }, 150);
+            createSparkFlash();
+        }
+        
+        function createSparkFlash() {
+            const wrapper = document.querySelector('.candle-wrapper');
+            if (wrapper) {
+                wrapper.style.transition = 'background 0.1s';
+                wrapper.style.background = 'rgba(255, 200, 100, 0.4)';
+                setTimeout(() => {
+                    if (wrapper) wrapper.style.background = '';
+                }, 200);
+            }
+        }
+        
+        if (candle) {
+            candle.addEventListener('click', onCandleClick);
+            candle.classList.remove('extinguished');
+        }
+        wishMessageSpan.innerHTML = '🕯️ 点击蜡烛，火焰跳动· 为你赐福 🕯️';
+        
+        // ----------------------------- 4. 随机加油语录 -----------------------------
+        const quotes = [
+            "💥 乾坤未定，你我皆是黑马！",
+            "📖 愿你提笔高考征战四方，合笔谈笑清风无恙。",
+            "🎯 若你决定灿烂，山无遮，海无拦。",
+            "⚡ 每一个挑灯夜读的夜晚，都是梦想在积蓄力量。",
+            "🔥 今日长缨在手，何时缚住苍龙？高考加油！",
+            "🌟 旗开得胜，一举夺魁！",
+            "🍃 保持平常心，发挥最佳水平，弟弟必胜！",
+            "💯 你的名字那么好听，一定要出现在录取通知书上！",
+            "⭐ 以梦为马，不负韶华，高考大捷！",
+            "🎓 乘风破浪，直挂云帆，未来可期！"
+        ];
+        const quoteElement = document.getElementById('randomQuote');
+        const refreshBtn = document.getElementById('refreshQuoteBtn');
+        function updateRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            quoteElement.innerHTML = `✨ ${quotes[randomIndex]} ✨`;
+        }
+        refreshBtn.addEventListener('click', updateRandomQuote);
+        updateRandomQuote(); 
+        
+        // ----------------------------- 5. 背景音乐处理 -----------------------------
+        const bgMusic = new Audio();
+        bgMusic.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
+        bgMusic.loop = true;
+        bgMusic.volume = 0.5;
+        let musicPlaying = false;
+        const playBtn = document.getElementById('playMusicBtn');
+        const pauseBtn = document.getElementById('pauseMusicBtn');
+        const musicStatusSpan = document.getElementById('musicStatus');
+        
+        playBtn.addEventListener('click', () => {
+            bgMusic.play().then(() => {
+                musicPlaying = true;
+                musicStatusSpan.innerText = '🎶 播放中';
+            }).catch(err => {
+                musicStatusSpan.innerText = '⚠️ 点击重试';
+                bgMusic.play().catch(e=> musicStatusSpan.innerText='请手动开启');
+            });
+        });
+        pauseBtn.addEventListener('click', () => {
+            bgMusic.pause();
+            musicPlaying = false;
+            musicStatusSpan.innerText = '⏸ 已暂停';
+        });
+        
+        let firstTouch = false;
+        document.body.addEventListener('touchstart', function initAudio() {
+            if (!firstTouch && !musicPlaying) {
+                firstTouch = true;
+                musicStatusSpan.innerText = '点击播放按钮听歌🎧';
+            }
+        }, { once: true });
+        
+        // 视频自动播放静音策略（不自动播放以免干扰，保留用户点击控件即可，不加自动播放）
+        const videoEl = document.getElementById('blessingVideo');
+        if (videoEl) {
+            // 为了更好的移动体验，确保视频可以正常加载，预加载元数据
+            videoEl.load();
+        }
+        
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => { ticking = false; });
+                ticking = true;
+            }
+        });
+        
+        console.log("高考祝福网页已启动：两张照片+一个视频，正楷寄语，一根蜡烛无限祝福！祝弟弟金榜题名！");
+    })();
+</script>
+</body>
+</html>
